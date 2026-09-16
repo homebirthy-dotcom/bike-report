@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自行車產業研究報告</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg-2: #161b22;
+    --bg-3: #1c2333;
+    --line: #2a3142;
+    --txt: #e6edf3;
+    --txt-dim: #8b949e;
+    --orange: #ff7a18;
+    --orange-soft: #ffb066;
+    --orange-dark: #b34d00;
+    --ok: #3fb950;
+    --danger: #f85149;
+    --accent: #39c5cf;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background:
+      radial-gradient(1200px 500px at 80% -10%, rgba(255,122,24,.10), transparent 60%),
+      radial-gradient(900px 500px at 10% -10%, rgba(57,197,207,.08), transparent 60%),
+      var(--bg);
+    color: var(--txt);
+    font-family: "Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif;
+    min-height: 100vh;
+    padding: 40px 48px 60px;
+    line-height: 1.6;
+  }
+
+  /* ---------- Tooltip ---------- */
+  [data-tip] {
+    position: relative;
+    cursor: help;
+    border-bottom: 1px dashed rgba(255, 122, 24, .55);
+    transition: color .2s;
+  }
+  [data-tip]::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 10px);
+    transform: translateX(-50%) translateY(-4px);
+    width: 260px;
+    background: #10151d;
+    border: 1px solid var(--orange-dark);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: var(--txt);
+    box-shadow: 0 6px 24px rgba(0,0,0,.55), 0 0 0 1px rgba(255,122,24,.15);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    z-index: 99;
+    transition: opacity .18s ease, transform .18s ease, visibility .18s;
+    white-space: normal;
+    text-align: left;
+    font-weight: 400;
+  }
+  [data-tip]::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 3px);
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-bottom-color: var(--orange-dark);
+    opacity: 0;
+    visibility: hidden;
+    z-index: 100;
+    transition: opacity .18s, visibility .18s;
+  }
+  [data-tip]:hover { color: var(--orange-soft); }
+  [data-tip]:hover::after,
+  [data-tip]:hover::before { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+  [data-tip]:hover::before { transform: translateX(-50%); }
+
+  .tip-narrow::after { width: 200px; }
+  .tip-wide::after { width: 340px; }
+
+  /* ---------- Header ---------- */
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 24px;
+    margin-bottom: 36px;
+  }
+  .title-block h1 {
+    font-size: 30px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .title-block h1 .dot {
+    width: 14px; height: 14px;
+    background: var(--orange);
+    border-radius: 3px;
+    transform: rotate(45deg);
+    box-shadow: 0 0 18px var(--orange);
+  }
+  .title-block h1 .year {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--txt-dim);
+    border: 1px solid var(--line);
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+  }
+  .subtitle {
+    margin-top: 10px;
+    color: var(--txt-dim);
+    font-size: 15px;
+    letter-spacing: .5px;
+  }
+  .status {
+    display: flex;
+    gap: 10px;
+    font-size: 12.5px;
+    color: var(--txt-dim);
+  }
+  .status .chip {
+    border: 1px solid var(--line);
+    background: var(--bg-2);
+    padding: 6px 14px;
+    border-radius: 20px;
+  }
+  .status .chip .k { color: var(--orange-soft); font-weight: 700; }
+  .status .chip .ok { color: var(--ok); }
+
+  /* ---------- Section ---------- */
+  section { margin-bottom: 40px; }
+  .sec-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .sec-index {
+    font-family: Consolas, monospace;
+    color: var(--orange);
+    font-weight: 700;
+    font-size: 14px;
+    background: rgba(255,122,24,.12);
+    border: 1px solid rgba(255,122,24,.35);
+    padding: 3px 10px;
+    border-radius: 6px;
+  }
+  .sec-head h2 { font-size: 21px; font-weight: 700; letter-spacing: .5px; }
+  .sec-head .hint { color: var(--txt-dim); font-size: 13px; }
+
+  /* ---------- KPI cards ---------- */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+  }
+  .kpi {
+    background: linear-gradient(180deg, var(--bg-2), #131820);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color .25s, transform .25s;
+  }
+  .kpi:hover { border-color: var(--orange); transform: translateY(-3px); }
+  .kpi::after {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--orange);
+  }
+  .kpi .label { color: var(--txt-dim); font-size: 13px; letter-spacing: .5px; }
+  .kpi .value {
+    font-size: 30px; font-weight: 800;
+    margin-top: 6px;
+    font-family: Consolas, monospace;
+    color: var(--txt);
+  }
+  .kpi .value em { color: var(--orange); font-style: normal; }
+  .kpi .delta { font-size: 12.5px; margin-top: 6px; font-family: Consolas, monospace; }
+  .kpi .delta.up { color: var(--ok); }
+  .kpi .delta.down { color: var(--danger); }
+
+  /* ---------- Chart cards ---------- */
+  .chart-grid {
+    display: grid;
+    grid-template-columns: 7fr 5fr;
+    gap: 18px;
+  }
+  .card {
+    background: linear-gradient(180deg, var(--bg-2), #131820);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 20px 22px;
+  }
+  .card h3 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card h3 .l {
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    background: var(--orange);
+    display: inline-block;
+  }
+  .card .cap { color: var(--txt-dim); font-size: 12.5px; margin-bottom: 16px; }
+
+  /* ---------- Bar chart ---------- */
+  .bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    height: 240px;
+    padding-top: 20px;
+  }
+  .bar-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+    position: relative;
+  }
+  .bar-track { width: 100%; max-width: 46px; height: 100%; display: flex; align-items: flex-end; }
+  .bar {
+    width: 100%;
+    border-radius: 6px 6px 2px 2px;
+    background: linear-gradient(180deg, var(--orange-soft), var(--orange));
+    position: relative;
+    transition: filter .2s;
+  }
+  .bar:hover { filter: brightness(1.2); }
+  .bar .val {
+    position: absolute;
+    top: -24px; left: 50%;
+    transform: translateX(-50%);
+    font-family: Consolas, monospace;
+    font-size: 12.5px;
+    color: var(--orange-soft);
+  }
+  .bar-cat {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--txt-dim);
+    letter-spacing: .5px;
+  }
+  .gridline {
+    position: absolute;
+    left: 0; right: 0;
+    border-top: 1px dashed rgba(139,148,158,.22);
+  }
+
+  /* ---------- Multi-series bars ---------- */
+  .ms-grid { display: flex; gap: 14px; align-items: flex-end; height: 200px; padding-top: 16px; }
+  .ms-col { flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; }
+  .ms-pair { display: flex; gap: 4px; align-items: flex-end; height: 100%; width: 100%; max-width: 40px; justify-content: center; }
+  .ms-bar { width: 50%; border-radius: 4px 4px 1px 1px; }
+  .ms-bar.a { background: linear-gradient(180deg, #ffb066, var(--orange)); }
+  .ms-bar.b { background: linear-gradient(180deg, #39c5cf, #1f7f8a); }
+  .ms-cat { margin-top: 9px; font-size: 11.5px; color: var(--txt-dim); }
+
+  /* ---------- Donut ---------- */
+  .donut-wrap { display: flex; align-items: center; gap: 22px; }
+  .donut { position: relative; width: 180px; height: 180px; flex: none; }
+  .donut svg { transform: rotate(-90deg); }
+  .donut .mid {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+  }
+  .donut .mid .big { font-size: 26px; font-weight: 800; font-family: Consolas, monospace; }
+  .donut .mid .small { color: var(--txt-dim); font-size: 11.5px; margin-top: 2px; }
+  .legend-list { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+  .legend-row { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+  .sw { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+  .legend-row .name { flex: 1; color: var(--txt-dim); }
+  .legend-row .num { font-family: Consolas, monospace; font-weight: 700; }
+  .legend-row .pct { color: var(--orange-soft); font-family: Consolas, monospace; font-size: 12px; }
+
+  /* ---------- Report framework ---------- */
+  .framework {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+  }
+  .fw-card {
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px;
+    position: relative;
+    transition: border-color .25s, transform .25s;
+  }
+  .fw-card:hover { border-color: var(--orange); transform: translateY(-4px); }
+  .fw-num {
+    font-family: Consolas, monospace;
+    font-size: 15px;
+    color: var(--orange);
+    font-weight: 700;
+  }
+  .fw-card h4 { margin: 8px 0 6px; font-size: 15px; }
+  .fw-card p { color: var(--txt-dim); font-size: 12.5px; }
+  .fw-desc {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--line);
+    font-size: 12px;
+    color: var(--orange-soft);
+  }
+
+  /* ---------- Data sources ---------- */
+  .src-list { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; }
+  .src {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--bg-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 12px 16px;
+    transition: border-color .2s;
+  }
+  .src:hover { border-color: var(--orange); }
+  .src .ico {
+    width: 34px; height: 34px; flex: none;
+    border-radius: 8px;
+    background: rgba(255,122,24,.12);
+    border: 1px solid rgba(255,122,24,.35);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+  }
+  .src .t { font-size: 13.5px; font-weight: 600; }
+  .src .d { font-size: 12px; color: var(--txt-dim); margin-top: 2px; }
+
+  /* ---------- Legend (bottom right) ---------- */
+  .legend-tag {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    background: rgba(16,21,29,.92);
+    border: 1px solid var(--line);
+    border-top: 2px solid var(--orange);
+    border-radius: 10px;
+    padding: 14px 16px;
+    min-width: 220px;
+    font-size: 12.5px;
+    z-index: 200;
+    box-shadow: 0 10px 32px rgba(0,0,0,.6);
+    backdrop-filter: blur(6px);
+  }
+  .legend-tag .lg-h {
+    display: flex; align-items: center; gap: 8px;
+    font-weight: 700; font-size: 12px;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    color: var(--orange-soft);
+  }
+  .lg-h .sq { width: 8px; height: 8px; background: var(--orange); border-radius: 2px; }
+  .lg-row { display: flex; align-items: center; gap: 10px; padding: 4px 0; }
+  .lg-row .lg-sq { width: 12px; height: 12px; border-radius: 3px; flex: none; }
+  .lg-row .lg-txt { color: var(--txt-dim); }
+  .lg-row .lg-txt b { color: var(--txt); font-weight: 600; }
+
+  footer {
+    margin-top: 34px;
+    padding-top: 18px;
+    border-top: 1px solid var(--line);
+    color: var(--txt-dim);
+    font-size: 12.5px;
+    display: flex;
+    justify-content: space-between;
+  }
+  footer .hl { color: var(--orange-soft); }
+</style>
+</head>
+<body>
+
+  <header>
+    <div class="title-block">
+      <h1>
+        <span class="dot"></span>
+        自行車產業研究報告
+        <span class="year">2026 · Q1 更新</span>
+      </h1>
+      <p class="subtitle">
+        全球自行車市場趨勢、兩輪電動化與供應鏈韌性之專題研究
+      </p>
+    </div>
+    <div class="status">
+      <span class="chip">資料基準：<span class="k" data-tip="本報告所有市場預估數值，係彙整歐盟自行車產業協會、麥肯錫與公開產業數據後之綜合推估值。報告撰寫重點在於說明推估方法與不確定性，而非追求單一權威數字。">2025 全年</span></span>
+      <span class="chip">狀態 <span class="ok">●</span> 撰寫完成</span>
+    </div>
+  </header>
+
+  <!-- 核心指標 -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-index">01</span>
+      <h2>核心市場指標</h2>
+      <span class="hint">— 滑鼠移到項目上可查看說明</span>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi" data-tip="全球自行車市場（含電動輔助自行車 E-Bike）零售總值之推估。報告應標註幣值為美元、匯率基準日與資料來源。">
+        <div class="label">全球市場總值</div>
+        <div class="value">US$ <em>612</em> B</div>
+        <div class="delta up">▲ +6.4% <span style="color:var(--txt-dim)">YoY</span></div>
+      </div>
+      <div class="kpi" data-tip="E-Bike 為近五年成長最快的次領域，複合年成長率（CAGR）約 9–11%。研究報告建議將「電動化」列為獨立分析章節。">
+        <div class="label">電動輔助自行車</div>
+        <div class="value">US$ <em>184</em> B</div>
+        <div class="delta up">▲ +11.8% <span style="color:var(--txt-dim)">YoY</span></div>
+      </div>
+      <div class="kpi" data-tip="年出貨量反映整體產業景氣。2023–2025 年受通路庫存調整影響，出貨量自疫情高峰回落；但產品平均單價隨電動化持續提升。">
+        <div class="label">年度出貨量</div>
+        <div class="value"><em>132</em> M 台</div>
+        <div class="delta down">▼ -2.3% <span style="color:var(--txt-dim)">YoY</span></div>
+      </div>
+      <div class="kpi" data-tip="歐洲為全球高端自行車最主要的消費市場，佔全球零售值比重最高。報告中應比較歐洲、北美與亞洲三大區域的結構差異。">
+        <div class="label">歐洲市占率</div>
+        <div class="value"><em>38</em> %</div>
+        <div class="delta up">▲ +0.9pt <span style="color:var(--txt-dim)">YoY</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 圖表區 -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-index">02</span>
+      <h2>市場數據視覺化</h2>
+      <span class="hint">— 報表核心圖表建議保留原始資料表於附錄</span>
+    </div>
+    <div class="chart-grid">
+      <div class="card">
+        <h3><span class="l"></span> 區域市場規模推估（十億美元）</h3>
+        <p class="cap" data-tip="條狀圖適合呈現「類別間的數量比較」。撰寫研究報告時，圖表下方務必註明資料來源、單位與年度，並刪除不必要的裝飾線。">景氣復甦帶動主要區域成長</p>
+        <div class="bars">
+          <div class="bar-col">
+            <div class="gridline" style="bottom:25%" data-tip="虛線為量尺輔助線，用於快速對比值大小。"></div>
+            <div class="gridline" style="bottom:50%"></div>
+            <div class="bar-track">
+              <div class="bar" style="height:30%" data-tip="亞洲地區含中國大陸與印度。中國市場仍以內需車款為主，中高階需求快速成長。">
+                <span class="val">214</span>
+              </div>
+            </div>
+            <div class="bar-cat">亞洲</div>
+          </div>
+          <div class="bar-col">
+            <div class="bar-track">
+              <div class="bar" style="height:48%" data-tip="歐洲市場以高端自行車與 E-Bike 為主力，平均單價最高，是品牌溢價的重要市場。">
+                <span class="val">233</span>
+              </div>
+            </div>
+            <div class="bar-cat">歐洲</div>
+          </div>
+          <div class="bar-col">
+            <div class="bar-track">
+              <div class="bar" style="height:23%" data-tip="北美市場在疫情後出現庫存調整，2025 年起需求回穩，碳纖維車架與通勤車種為看點。">
+                <span class="val">112</span>
+              </div>
+            </div>
+            <div class="bar-cat">北美</div>
+          </div>
+          <div class="bar-col">
+            <div class="bar-track">
+              <div class="bar" style="height:11%" data-tip="中南美洲與非洲市場規模仍小，但成長動能來自基礎建設投資與共享單車計畫。">
+                <span class="val">53</span>
+              </div>
+            </div>
+            <div class="bar-cat">其他</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3><span class="l"></span> 車種結構占比</h3>
+        <p class="cap" data-tip="環狀圖適合呈現「整體中各部分的占比」。佔比加總應為 100%，並建議以實數與百分比並列，避免讀者誤讀。">依出貨量計算（2025）</p>
+        <div class="donut-wrap">
+          <div class="donut">
+            <svg width="180" height="180" viewBox="0 0 180 180">
+              <circle cx="90" cy="90" r="70" fill="none" stroke="#1c2333" stroke-width="26"></circle>
+              <circle cx="90" cy="90" r="70" fill="none" stroke="#ff7a18" stroke-width="26"
+                      stroke-dasharray="142.4 439.8" stroke-dashoffset="0" stroke-linecap="butt" data-tip="通勤／城市車為最大宗，佔整體出貨量約 32%。"></circle>
+              <circle cx="90" cy="90" r="70" fill="none" stroke="#ffb066" stroke-width="26"
+                      stroke-dasharray="150.7 439.8" stroke-dashoffset="-360.2" data-tip="電動輔助自行車（E-Bike）佔約 34%，且單價高於傳統車種。"></circle>
+              <circle cx="90" cy="90" r="70" fill="none" stroke="#39c5cf" stroke-width="26"
+                      stroke-dasharray="89.2 439.8" stroke-dashoffset="-200.1" data-tip="登山／越野車為運動休閒主力，北美與歐洲占比高。"></circle>
+              <circle cx="90" cy="90" r="70" fill="none" stroke="#8b949e" stroke-width="26"
+                      stroke-dasharray="57.5 439.8" stroke-dashoffset="-551.6" data-tip="公路車與其他運動車種合計約 13%。"></circle>
+            </svg>
+            <div class="mid">
+              <span class="big">132M</span>
+              <span class="small">總出貨量</span>
+            </div>
+          </div>
+          <div class="legend-list">
+            <div class="legend-row">
+              <span class="sw" style="background:#ffb066"></span>
+              <span class="name" data-tip="E-Bike 含中置馬達、輪轂馬達與輕型電動車。歐洲為主要市場，佔全球 E-Bike 出貨逾半。">電動輔助</span>
+              <span class="num">45M</span>
+              <span class="pct">34%</span>
+            </div>
+            <div class="legend-row">
+              <span class="sw" style="background:#ff7a18"></span>
+              <span class="name" data-tip="城市通勤車與代步車，深入分析通勤政策、都會共享單車計畫之影響。">通勤．城市</span>
+              <span class="num">42M</span>
+              <span class="pct">32%</span>
+            </div>
+            <div class="legend-row">
+              <span class="sw" style="background:#39c5cf"></span>
+              <span class="name" data-tip="MTB 登山車，北美佔比最高，受戶外運動風潮帶動。">登山越野</span>
+              <span class="num">28M</span>
+              <span class="pct">21%</span>
+            </div>
+            <div class="legend-row">
+              <span class="sw" style="background:#8b949e"></span>
+              <span class="name" data-tip="含公路車、場地車、折疊車與其他特殊車種。">公路．其他</span>
+              <span class="num">17M</span>
+              <span class="pct">13%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 電動化趨勢 -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-index">03</span>
+      <h2>電動化趨勢：年出貨量（百萬台）</h2>
+      <span class="hint">— 雙色條呈現傳統車 vs E-Bike</span>
+    </div>
+    <div class="card">
+      <h3><span class="l"></span> 2020 → 2025 出貨結構變化</h3>
+      <p class="cap" data-tip="堆疊式長條圖可同時呈現「總量」與「組成結構」。若總量變化不大但結構改變，常是重要的產業訊號——本圖即顯示電動化占比逐年上升。">橘色：傳統自行車　｜　青色：電動輔助自行車</p>
+      <div class="ms-grid">
+        <div class="ms-col">
+          <div class="ms-pair" style="height:100%">
+            <div class="ms-bar a" style="height:78%" data-tip="2020 傳統自行車出貨約 112M 台，受疫情初期封城影響供應鏈。"></div>
+            <div class="ms-bar b" style="height:15%" data-tip="2020 E-Bike 出貨僅約 21M 台。"></div>
+          </div>
+          <div class="ms-cat">2020</div>
+        </div>
+        <div class="ms-col">
+          <div class="ms-pair" style="height:100%">
+            <div class="ms-bar a" style="height:86%" data-tip="2021 需求高峰，整體出貨達歷史高點。"></div>
+            <div class="ms-bar b" style="height:18%" data-tip="2021 E-Bike 約 25M 台。"></div>
+          </div>
+          <div class="ms-cat">2021</div>
+        </div>
+        <div class="ms-col">
+          <div class="ms-pair" style="height:100%">
+            <div class="ms-bar a" style="height:74%" data-tip="2022 庫存開始堆積，傳統車出貨下滑。"></div>
+            <div class="ms-bar b" style="height:26%" data-tip="2022 E-Bike 約 35M 台，逆勢成長。"></div>
+          </div>
+          <div class="ms-cat">2022</div>
+        </div>
+        <div class="ms-col">
+          <div class="ms-pair" style="height:100%">
+            <div class="ms-bar a" style="height:66%" data-tip="2023 通路庫存高檔，品牌廠調整產能。"></div>
+            <div class="ms-bar b" style="height:31%" data-tip="2023 E-Bike 約 42M 台。"></div>
+          </div>
+          <div class="ms-cat">2023</div>
+        </div>
+        <div class="ms-col">
+          <div class="ms-pair" style="height:100%">
+            <div class="ms-bar a" style="height:64%" data-tip="2024 市場結構明顯轉變。"></div>
+            <div class="ms-bar b" style="height:33%" data-tip="2024 E-Bike 約 44M 台。"></div>
+          </div>
+          <div class="ms-cat">2024</div>
+        </div>
+        <div class="ms-col">
+          <div class="ms-pair" style="height:100%">
+            <div class="ms-bar a" style="height:63%" data-tip="2025 E-Bike 佔比達 34%，規模化效應使電池成本逐年下降。"></div>
+            <div class="ms-bar b" style="height:35%" data-tip="2025 E-Bike 約 45M 台，帶動整體單價上揚。"></div>
+          </div>
+          <div class="ms-cat">2025</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 報告架構指南 -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-index">04</span>
+      <h2>報告撰寫架構指南</h2>
+      <span class="hint">— 每個章節附撰寫要點</span>
+    </div>
+    <div class="framework">
+      <div class="fw-card" data-tip="研究目的應回答「為何現在研究此主題」。例如：台灣為全球自行車製造重鎮，產業轉型影響深遠——明確設定研究問題與邊界。">
+        <span class="fw-num">01</span>
+        <h4>研究背景與目的</h4>
+        <p>動機、問題定義、研究範圍</p>
+        <div class="fw-desc">明確界定時間、地理與車種範圍。</div>
+      </div>
+      <div class="fw-card" data-tip="文獻回顧須分類並評述既有研究，最後歸納出三個研究缺口（Research Gaps），作為本研究之切入點。">
+        <span class="fw-num">02</span>
+        <h4>產業現況掃描</h4>
+        <p>供需、通路、價格帶比較</p>
+        <div class="fw-desc">PEST / 五力分析擇一即可。</div>
+      </div>
+      <div class="fw-card" data-tip="方法論需具可重現性：說明資料來源、抽樣方式、統計方法與工具（如 Excel、Python），並討論研究限制。">
+        <span class="fw-num">03</span>
+        <h4>研究方法</h4>
+        <p>資料來源、分析架構、限制</p>
+        <div class="fw-desc">圖表單位、口徑須一致。</div>
+      </div>
+      <div class="fw-card" data-tip="數據分析應先從「描述性統計」切入，再進入交叉分析與趨勢推估。每個結論需標註係由哪張圖表推得。">
+        <span class="fw-num">04</span>
+        <h4>數據分析與發現</h4>
+        <p>趨勢、交叉比較、案例佐證</p>
+        <div class="fw-desc">發現需回應研究問題。</div>
+      </div>
+      <div class="fw-card" data-tip="結論要直接回答研究目的，並對產業提出可執行的建議（製造、通路、政策三個層次）。需標示未來研究方向。">
+        <span class="fw-num">05</span>
+        <h4>結論與建議</h4>
+        <p>總結、產業建議、未來展望</p>
+        <div class="fw-desc">建議要具體、可執行。</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 資料來源 -->
+  <section>
+    <div class="sec-head">
+      <span class="sec-index">05</span>
+      <h2>適用資料來源</h2>
+      <span class="hint">— 引用時須標註原始文件與存取日期</span>
+    </div>
+    <div class="src-list">
+      <div class="src" data-tip="歐盟自行車產業協會：每年發布泛歐區自行車與 E-Bike 統計，為歐洲市場最常引用的公開來源之一。">
+        <span class="ico">EU</span>
+        <span><div class="t">European Bicycle Industry (CONEBI)</div><div class="d">歐洲產銷統計 · 產業白皮書</div></span>
+      </div>
+      <div class="src" data-tip="台灣自行車輸出業同業公會：提供台灣出口量、值與主要出口市場統計，是研究台灣供應鏈的首選來源。">
+        <span class="ico">TW</span>
+        <span><div class="t">台灣自行車輸出業同業公會 (TBA)</div><div class="d">出口統計 · 會員產業動態</div></span>
+      </div>
+      <div class="src" data-tip="市調機構如 Statista、Euromonitor、麥肯錫報告，需注意其推估值之方法論說明與更新頻率。">
+        <span class="ico">RS</span>
+        <span><div class="t">市場研究機構報告</div><div class="d">產業規模推估 · 消費者調查</div></span>
+      </div>
+      <div class="src" data-tip="公開財報（巨大、美利達、桂盟等上市櫃公司年報）可取得營收結構、毛利率與產能規劃的第一手數字。">
+        <span class="ico">IN</span>
+        <span><div class="t">上市櫃公司財報</div><div class="d">營收結構 · 工廠產能數據</div></span>
+      </div>
+      <div class="src" data-tip="台灣自行車導覽（Taiwan Bicycle Source, TBS）由輪彥國際出版：收錄台灣自行車供應商之公司資料、品牌、產品類別與認證，可用於供應鏈盤點與廠商型錄分析。屬商業出版品，正式引用前須取得授權。">
+        <span class="ico">OG</span>
+        <span><div class="t">台灣自行車導覽 TBS（輪彥國際）</div><div class="d">台灣供應商目錄 · 採購指南年刊</div></span>
+      </div>
+      <div class="src" data-tip="輪彥旗下 B2B 數位採購平台 bikeb2b.biz：聚焦全球自行車 E-Bike 整車與零配件供應商，提供大數據分析與媒合，可補充 TBS 紙本資料的時效性。">
+        <span class="ico">B2</span>
+        <span><div class="t">bikeb2b.biz 採購平台</div><div class="d">線上供應商資料庫 · 市場媒合</div></span>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div>© 2026 自行車產業研究專案　|　<span class="hl" data-tip="本頁圖表數據為教學演示用途，引用於正式報告前請核對原始資料來源並取得授權。">數據為示意資料</span></div>
+    <div>建議引用格式：作者（2026），《自行車產業研究報告》。</div>
+  </footer>
+
+  <!-- 圖例（右下角） -->
+  <div class="legend-tag">
+    <div class="lg-h"><span class="sq"></span> 圖例 Legend</div>
+    <div class="lg-row">
+      <span class="lg-sq" style="background:#ff7a18"></span>
+      <span class="lg-txt"><b>橘色</b> — 主要指標／焦點</span>
+    </div>
+    <div class="lg-row">
+      <span class="lg-sq" style="background:#ffb066"></span>
+      <span class="lg-txt"><b>淺橘</b> — 次級分類</span>
+    </div>
+    <div class="lg-row">
+      <span class="lg-sq" style="background:#39c5cf"></span>
+      <span class="lg-txt"><b>青色</b> — 對照系列／E-Bike</span>
+    </div>
+    <div class="lg-row">
+      <span class="lg-sq" style="border:1px dashed #ff7a18;background:transparent"></span>
+      <span class="lg-txt"><b>虛線</b> — 附註／說明連結</span>
+    </div>
+  </div>
+
+</body>
+</html>

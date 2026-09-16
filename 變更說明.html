@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>變更說明 — 自行車產業研究報告</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg-2: #161b22;
+    --line: #2a3142;
+    --txt: #e6edf3;
+    --txt-dim: #8b949e;
+    --orange: #ff7a18;
+    --orange-soft: #ffb066;
+    --orange-dark: #b34d00;
+    --ok: #3fb950;
+    --accent: #39c5cf;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background:
+      radial-gradient(1000px 450px at 85% -10%, rgba(255,122,24,.10), transparent 60%),
+      radial-gradient(800px 450px at 5% -10%, rgba(57,197,207,.08), transparent 60%),
+      var(--bg);
+    color: var(--txt);
+    font-family: "Segoe UI", "Microsoft JhengHei", "PingFang TC", sans-serif;
+    min-height: 100vh;
+    padding: 40px 48px 80px;
+    line-height: 1.6;
+  }
+
+  [data-tip] { position: relative; cursor: help; border-bottom: 1px dashed rgba(255,122,24,.55); transition: color .2s; }
+  [data-tip]::after {
+    content: attr(data-tip);
+    position: absolute; left: 50%; top: calc(100% + 10px);
+    transform: translateX(-50%) translateY(-4px);
+    width: 240px; background: #10151d;
+    border: 1px solid var(--orange-dark); border-radius: 8px;
+    padding: 9px 12px; font-size: 12.5px; line-height: 1.55; color: var(--txt);
+    box-shadow: 0 6px 24px rgba(0,0,0,.55);
+    opacity: 0; visibility: hidden; pointer-events: none; z-index: 99;
+    transition: opacity .18s ease, transform .18s ease, visibility .18s;
+    text-align: left; font-weight: 400; white-space: normal;
+  }
+  [data-tip]::before {
+    content: ""; position: absolute; left: 50%; top: calc(100% + 3px);
+    transform: translateX(-50%);
+    border: 6px solid transparent; border-bottom-color: var(--orange-dark);
+    opacity: 0; visibility: hidden; z-index: 100; transition: opacity .18s, visibility .18s;
+  }
+  [data-tip]:hover { color: var(--orange-soft); }
+  [data-tip]:hover::after, [data-tip]:hover::before { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+  [data-tip]:hover::before { transform: translateX(-50%); }
+
+  header {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 22px; margin-bottom: 30px;
+    display: flex; justify-content: space-between; align-items: flex-end;
+  }
+  h1 { font-size: 26px; font-weight: 800; display: flex; align-items: center; gap: 12px; letter-spacing: 1px; }
+  h1 .dot { width: 13px; height: 13px; background: var(--orange); border-radius: 3px; transform: rotate(45deg); box-shadow: 0 0 16px var(--orange); }
+  h1 .tag { font-size: 13px; font-weight: 600; color: var(--txt-dim); border: 1px solid var(--line); padding: 3px 12px; border-radius: 20px; }
+  .sub { color: var(--txt-dim); font-size: 14px; margin-top: 8px; }
+  .status { font-size: 12.5px; color: var(--txt-dim); border: 1px solid var(--line); background: var(--bg-2); padding: 6px 14px; border-radius: 20px; }
+  .status .ok { color: var(--ok); }
+
+  section { margin-bottom: 34px; }
+  .sec-head { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+  .sec-index { font-family: Consolas, monospace; color: var(--orange); font-weight: 700; font-size: 13px; background: rgba(255,122,24,.12); border: 1px solid rgba(255,122,24,.35); padding: 2px 9px; border-radius: 6px; }
+  .sec-head h2 { font-size: 19px; font-weight: 700; }
+  .sec-head .hint { color: var(--txt-dim); font-size: 12.5px; }
+
+  .log { border-left: 2px solid var(--line); padding-left: 22px; display: flex; flex-direction: column; gap: 22px; }
+  .entry { position: relative; }
+  .entry::before {
+    content: ""; position: absolute; left: -31px; top: 5px;
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--bg); border: 3px solid var(--orange);
+    box-shadow: 0 0 10px rgba(255,122,24,.5);
+  }
+  .entry .ver { font-family: Consolas, monospace; font-size: 12px; color: var(--accent); letter-spacing: 1px; }
+  .entry h3 { font-size: 16px; margin: 3px 0 8px; }
+  .entry .desc {
+    background: linear-gradient(180deg, var(--bg-2), #131820);
+    border: 1px solid var(--line); border-radius: 10px;
+    padding: 14px 16px; font-size: 13.5px; color: var(--txt-dim);
+  }
+  .entry ul { margin: 8px 0 0 18px; display: flex; flex-direction: column; gap: 5px; }
+  .entry li::marker { color: var(--orange); }
+  .entry .file { font-family: Consolas, monospace; font-size: 12px; color: var(--orange-soft); }
+  .badge { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 9px; border-radius: 20px; margin-left: 6px; vertical-align: 2px; }
+  .badge.add { color: #7ee787; background: rgba(63,185,80,.14); border: 1px solid rgba(63,185,80,.4); }
+  .badge.fix { color: var(--orange-soft); background: rgba(255,122,24,.12); border: 1px solid rgba(255,122,24,.4); }
+  .badge.chg { color: #79c0ff; background: rgba(57,197,207,.12); border: 1px solid rgba(57,197,207,.4); }
+
+  .summary {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 6px;
+  }
+  .stat {
+    background: linear-gradient(180deg, var(--bg-2), #131820);
+    border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px;
+    transition: border-color .25s, transform .25s;
+  }
+  .stat:hover { border-color: var(--orange); transform: translateY(-3px); }
+  .stat .n { font-size: 26px; font-weight: 800; font-family: Consolas, monospace; color: var(--orange); }
+  .stat .l { color: var(--txt-dim); font-size: 12.5px; margin-top: 4px; }
+
+  footer {
+    margin-top: 34px; padding-top: 16px; border-top: 1px solid var(--line);
+    color: var(--txt-dim); font-size: 12.5px; display: flex; justify-content: space-between;
+  }
+
+  .legend-tag {
+    position: fixed; right: 24px; bottom: 24px;
+    background: rgba(16,21,29,.92); border: 1px solid var(--line);
+    border-top: 2px solid var(--orange); border-radius: 10px;
+    padding: 12px 15px; font-size: 12px; z-index: 200;
+    box-shadow: 0 10px 32px rgba(0,0,0,.6); backdrop-filter: blur(6px);
+  }
+  .legend-tag .lg-h { display: flex; align-items: center; gap: 7px; font-weight: 700; font-size: 11.5px; letter-spacing: 1px; margin-bottom: 8px; color: var(--orange-soft); }
+  .lg-h .sq { width: 8px; height: 8px; background: var(--orange); border-radius: 2px; }
+  .lg-row { display: flex; align-items: center; gap: 9px; padding: 3px 0; }
+  .lg-txt { color: var(--txt-dim); }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>
+      <span class="dot"></span>
+      變更說明
+      <span class="tag">Change Log</span>
+    </h1>
+    <p class="sub">《自行車產業研究報告》單一 HTML 專案之修改紀錄與版本摘要</p>
+  </div>
+  <span class="status">文件狀態 <span class="ok">●</span> 已定稿</span>
+</header>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-index">▣</span>
+    <h2>版本摘要</h2>
+    <span class="hint">— 各項目的說明框詳列具體做法</span>
+  </div>
+  <div class="summary">
+    <div class="stat" data-tip="所有成果均寫在單一 .html 檔內，未引入任何 CDN、框架或函式庫，全部使用原生 HTML + CSS + SVG 實作。">
+      <div class="n">2</div>
+      <div class="l">HTML 檔案總數</div>
+    </div>
+    <div class="stat" data-tip="全頁資料元素皆以 data-tip 屬性搭配純 CSS ::after/::before 實作懸停說明框，無 JavaScript 亦可運作。">
+      <div class="n">35+</div>
+      <div class="l">懸停說明框</div>
+    </div>
+    <div class="stat" data-tip="依先前需求修正的主要內容：新增 TBS 資料來源、修正公司名稱文字、移除冗餘 CSS 規則與註解。">
+      <div class="n">3</div>
+      <div class="l">本次清理項目</div>
+    </div>
+    <div class="stat" data-tip="除成果檔外，另建立 AGENTS.md 記錄專案設計規範，供後續 AI 代理協作時遵循。">
+      <div class="n">1</div>
+      <div class="l">規範文件</div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-index">01</span>
+    <h2>修改歷程</h2>
+    <span class="hint">— 依時間順序排列</span>
+  </div>
+  <div class="log">
+    <div class="entry">
+      <span class="ver">V1.0 · 初始建置</span>
+      <h3>建立產業研究報告主頁 <span class="badge add">新建</span></h3>
+      <div class="desc">建立 <span class="file">自行車產業研究報告.html</span>，首次交付：
+        <ul>
+          <li>深色底（<code>#0d1117</code>）＋橘色重點（<code>#ff7a18</code>）主題配色</li>
+          <li>全元素 <code>data-tip</code> 懸停說明框（純 CSS 實作）</li>
+          <li>右下角固定圖例（橘／淺橘／青色／虛線四色含義）</li>
+          <li>五大章節：核心指標、市場數據視覺化（SVG 圖表）、電動化趨勢、撰寫架構指南、適用資料來源</li>
+          <li>科技感視覺細節：monospace 數字、發光色塊、卡片 hover 浮起</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="entry">
+      <span class="ver">V1.1 · 規範建立</span>
+      <h3>新增 AGENTS.md 專案規範 <span class="badge add">新建</span></h3>
+      <div class="desc">建立 <span class="file">AGENTS.md</span>，將設計規範（配色、懸停說明、圖例、單一檔案限制、繁體中文）與驗證方式記錄成代理協作守則。</div>
+    </div>
+
+    <div class="entry">
+      <span class="ver">V1.2 · 內容擴充</span>
+      <h3>資料來源章節加入輪彥 TBS <span class="badge add">新增</span></h3>
+      <div class="desc">
+        更新 <span class="file">自行車產業研究報告.html</span> 之「適用資料來源」章節，由 4 筆擴為 6 筆：
+        <ul>
+          <li><b>台灣自行車導覽 TBS（輪彥國際）</b>— 台灣供應商目錄、採購指南年刊，含公司資料、品牌、產品類別與認證；明示為商業出版品需取得授權</li>
+          <li><b>bikeb2b.biz 採購平台</b>— 輪彥線上供應商資料庫，補強紙本資料的時效性</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="entry">
+      <span class="ver">V1.3 · 最終清理</span>
+      <h3>全檔檢查與修正 <span class="badge fix">修正</span></h3>
+      <div class="desc">
+        更新 <span class="file">自行車產業研究報告.html</span>，完成交付前清理：
+        <ul>
+          <li>修正財報舉例之公司名稱文字（「巨騰」→「巨大」）</li>
+          <li>「年度出貨量」指標之說明文字改為符合數據語境（庫存調整後回落、單價因電動化提升）</li>
+          <li>移除冗餘 CSS 規則（<code>.donut center-txt</code>）與空標籤對</li>
+          <li>段落註解統一（「成長動能與風險」→「電動化趨勢」）</li>
+          <li>標題工具提示文字語意修正（「寫作」→「報告撰寫」）</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="sec-head">
+    <span class="sec-index">02</span>
+    <h2>交付檔案清單</h2>
+    <span class="hint">— 本次工作成果內容</span>
+  </div>
+  <div class="log">
+    <div class="entry">
+      <span class="ver">FILE · 主成果</span>
+      <h3>自行車產業研究報告.html</h3>
+      <div class="desc">單一檔案研究報告頁面。深色科技感設計、全元素懸停說明、右下角圖例、內嵌原生 SVG 圖表、六大資料來源。「圖例」標示於頁面右下角。</div>
+    </div>
+    <div class="entry">
+      <span class="ver">FILE · 規範</span>
+      <h3>AGENTS.md</h3>
+      <div class="desc">專案代理規範：設計規範、常用指令與專案檔案清單，供 AI 協作與後續維護參考。</div>
+    </div>
+    <div class="entry">
+      <span class="ver">FILE · 本次新增</span>
+      <h3>變更說明.html <span class="badge add">新建</span></h3>
+      <div class="desc">本頁。記錄本次工作所有修改內容與版本歷程。</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div>© 2026 自行車產業研究專案　|　變更說明文件</div>
+  <div>對應成果：<span style="color:var(--orange-soft)">自行車產業研究報告.html</span></div>
+</footer>
+
+<div class="legend-tag">
+  <div class="lg-h"><span class="sq"></span> 識別 Legend</div>
+  <div class="lg-row"><span class="lg-sq" style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#3fb950"></span><span class="lg-txt">新增項目</span></div>
+  <div class="lg-row"><span class="lg-sq" style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#ffb066"></span><span class="lg-txt">修正項目</span></div>
+  <div class="lg-row"><span class="lg-sq" style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#39c5cf"></span><span class="lg-txt">調整項目</span></div>
+</div>
+
+</body>
+</html>
